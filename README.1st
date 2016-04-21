@@ -1,0 +1,45 @@
+This is the trial task application
+By Vadim Shandrikov, ahamemnonvs@gmail.com
+
+The form builder app with the opportunity of saving results on the server
+
+Client part of the application is implemented completely in JavaScript, using Backbone.js, Underscore.js, jQuery libraries
+To store user password hashes, the JavaScript implementation of SHA-1 algorithm is used
+
+To create HTML elements and forms, the underscore.js templates are used. Parameters of elements just created are passed to templates. Templates are rendered by Backbone.js library methods.
+
+Templates make the whole architecture flexible and easy to extended. To expand the existing list of elements with another one (for example, RadioButton), we just need to add an appropriate template into the application.
+
+All the work of creating and editing web forms is performed on the client side (in the browser), without page reload and data retrieval from the server. It is made by Backbone.js and Underscore.js libraries. Only created form data are passed to the server. 
+
+Server part of the application is implemented in Python. It is th simple web server based on BaseHTTPServer Python class. 
+
+Users data (web forms) are stored in the SQLite database as lists t parameters of HTML elements. When an user saves the form, a list of parameters is sent to the server and stored on the server side database. No HTML code is transferred through the network, which makes performance of entire application extremely well.
+
+INSTALLATION
+
+The application doesnt't need additional software to be installed.
+
+To install the application, it just should be copied to a directory on user's machine with Python 2.7 or higher installed.
+
+LAUNCH
+
+To launch the application, just find the file runserver.bat (for Windows) or runserver.sh (for *nix).t  This will launch the server on local machine
+
+After that, you may connect to the server from a browser with the followed address string:
+
+http://127.0.0.1:8888/builder.html
+Google Chrome is highly recommended to use this application.
+
+After that, an user may create and store his/her own web forms on the server.
+
+POSSIBLE ISSUES
+
+The BaseHTTPServer packet is present in Python starting from 2.7 version. 
+
+To check it, one may just type in Python console:
+
+>>import BaseHTTPServer as bhs
+>>print bhs.__version__
+
+Version of currently installed BaseHTTPServer packet will be printed
