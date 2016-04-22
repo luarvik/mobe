@@ -24,7 +24,7 @@ To install the application, it just should be copied to a directory on user's ma
 
 LAUNCH
 
-To launch the application, just find the file runserver.bat (for Windows) or runserver.sh (for *nix).t  This will launch the server on local machine
+To launch the application, just find the file runserver.bat (for Windows) or runserver.sh (for *nix). This will launch the server on local machine
 
 After that, you may connect to the server from a browser with the followed address string:
 
