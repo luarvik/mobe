@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Form Builder</title>
+    
+    
+    <link href="app/css/main.css" rel="stylesheet">
+    <link href="vendor/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+
+<script>
+
+ var drag = function(e){
+   
+    return false;
+  };
+
+var mouseDown = function(e,id){
+ 
+ if ($("#is_logged").val()==1)
+ {
+  elem = document.getElementById(id); //dragged element
+  parentElem = elem.parentNode;     //his parent, needed to restore it after drag'n'drop
+
+
+  elem_clone = elem.cloneNode(true);
+
+  var coords = elem.getBoundingClientRect();
+  var shiftX = e.pageX - coords.left;
+  var shiftY = e.pageY - coords.top;
+
+  elem.style.position = 'absolute';
+
+  var bar = document.getElementsByClassName('bar')[0];
+  var bar_X = bar.getBoundingClientRect().left;
+
+ 
+  bar.appendChild(elem);
+
+  moveAt(e);
+
+  parentElem.appendChild(elem_clone);
+
+
+  function moveAt(e) {
+    elem.style.left = e.pageX - shiftX + 'px';
+    elem.style.top = e.pageY - shiftY + 'px';
+  }
+
+  document.onmousemove = function(e) {
+    moveAt(e);
+  };
+
+  this.onmouseup = function() {
+    document.onmousemove = null;
+    elem.onmouseup = null;
+
+  };
+  }
+  else
+   $("#loginform").toggle();
+};
+
+
+
+ 
+ </script>
+
+  </head>
+
+ <body>
+<input type="hidden" id="is_logged" value=0>
+<div id="loginform" class="box form">
+    <p class="cap">Please login to start building the form<a href="" class="close">Close</a></p>
+    <div class="formcont">
+      <fieldset id="signin_menu">
+      <form method="post" id="signin" action="">
+        <label for="username">Login</label>
+        <input id="username" name="username" value="user" title="username" class="required" tabindex="4" type="text">
+        </p>
+        <p>
+          <label for="password">Password</label>
+          <input id="password" name="password" value="user" title="password" class="required" tabindex="5" type="password">
+        </p>
+        <p class="clear"></p>
+        <p class="remember">
+          <input id="signin_submit" value="Enter" tabindex="6" type="button">
+          <input id="cancel_submit" value="Cancel" tabindex="7" type="button">
+        </p>
+      </form>
+      </fieldset>
+    </div>
+    <div class="formfooter"></div>
+  </div>
+  
+  
+
+ 
+ <div class = "elements">
+
+  <div class="row">
+        <div class="col-xs-12 main-container">
+        
+        </div>
+      </div>
+ </div>
+
+ <div class = "bar" id="el-container" ondrop = "drop(event)"  ondragover = "allowDrop(event)">
+ <p>Drag'n'Drop chosen element here to create your own web form</p>
+
+  <div class = "dashboard" id="dash">
+ <p>LATEST USER'S ACTIVITY</p>
+ <p>Form data elements saved recently:</p>
+ <p id="usract"></p>
+ </div> 
+
+ </div>
+
+
+
+   <div class="tools"> 
+  
+      <button class="button" id="saveform" onclick="sendHTTP()">SAVE FORM</button>
+
+      <button class="button" id="dboardbtn" onclick="showDashboard()" >DASHBOARD</button>
+
+      <button class="signout-button" id="signout" onclick="signOut()">SIGN OUT</button>
+
+      <p id="toolbar" class="toolbartext"></p>
+  
+  </div>
+
+  <script type="text/template" id="formbuilder-input-element">
+   <div id=<%- div_id %>  draggable = "true" ondragstart = <%- ondragstart %> onmousedown = "mouseDown(event,this.id)" >
+    <input type=<%- type %> value=<%- value %> id=<%- id %> width="40">
+    <label for=<%- id %> ><%- label %></label>
+   </div> 
+ </script>
+
+ <script type="text/template" id="formbuilder-elements">
+     <p>Choose an element to add to the form</p>
+      
+      <ul class="elements-container"></ul>
+
+      <p>You may easily extend existing list of elements with new ones</p>
+    
+ </script>
+ 
+ <script src="vendor/jquery/jquery.js"></script>
+ <script src="vendor/underscore/underscore.js"></script>
+ <script src="vendor/backbone/backbone.js"></script>
+ <script src="vendor/hash/sha1.js"></script>
+
+ <script src="app/js/app.js"></script>
+ <script src="app/js/models/element.js"></script>
+ <script src="app/js/collections/elements.js"></script>
+ <script src="app/js/views/element.js"></script>
+ <script src="app/js/views/elements.js"></script>
+ <script src="app/js/router.js"></script> 
+
+ <script>
+  
+
+ 
+  $(function(){
+
+    //these are base elements for our form builder. We may expand this list with any other ones
+
+    FormBuilderManager.start({
+     
+      elements: [
+        {
+          id: "1",
+          div_id: "10",
+          type: 'button',
+          value: 'Button',
+          label: 'Simple button',
+          ondragstart: 'drag(event)'
+ 
+        },
+
+        {
+          id: "2",
+          div_id: "20",
+          type: 'text',
+          value: 'TextField',
+          label: 'Simple text',
+          ondragstart: 'drag(event)'
+        },
+
+        {
+          id: "3",
+          div_id: "30",
+          type: 'checkbox',
+          value: 'Checkbox',
+          label: 'Simple checkbox',
+          ondragstart: 'drag(event)'
+
+        }
+
+      ]
+
+    });
+
+
+  });
+
+ </script>
+
+ <script>
+
+ var signOut = function(){
+    $("#is_logged").attr("value",0);
+    $("#loginform").toggle();
+    $(".lock").fadeOut();
+
+ };
+
+  var sendHTTP = function(){
+   
+   
+    var params="";
+    var divChildCount = $('div.bar').find('div').each(function(index, elem) {
+     var id = elem.id;
+     var top = elem.style.top;
+     var left = elem.style.left; 
+     // We don't need to store the entire html of a chosen element
+     // We send and store the  elements info on the server as a list of its parameters
+     // Later we just put these parameters into appropriate BACKBONE.JS templates
+     // It improves the entire performance of the system
+     params+='id='+encodeURIComponent(id)+'&top='+encodeURIComponent(top)+'&left='+encodeURIComponent(left)+'&';
+      
+   }).length;
+
+     if (divChildCount == 0){
+       
+       alert("You should add at least one element");
+       return;
+     }
+     params+='end=true';
+
+     var xhr = new XMLHttpRequest();
+   
+     xhr.open('GET','http://127.0.0.1:8888?'+params,false); //asynchronous request
+     
+     //Send list of parameters to the server
+     xhr.send(null);
+     
+     
+ };
+
+ var showDashboard = function(){
+   //$("#dash").css("visibility","visible");
+   //$("#dash").show();
+
+   if ($("#dboardbtn").html()=="DASHBOARD")
+   {
+      
+       $("#dash").css("visibility","visible");
+       $("#dash").show();
+       $("#dboardbtn").html("HIDE");
+
+      var xhr = new XMLHttpRequest();
+
+       xhr.onreadystatechange = function() { 
+       $("#usract").html(xhr.responseText);
+
+      }
+   
+      xhr.open('GET','http://127.0.0.1:8888?dashboard=1',false); //asynchronous request
+     
+     //Send list of parameters to the server
+      xhr.send(null);
+
+      
+
+    }
+    else{
+       $("#dash").css("visibility","hidden");
+       $("#dash").hide();
+       $("#dboardbtn").html("DASHBOARD");
+
+     
+
+    }
+
+
+ };
+
+ </script>
+
+ <script>
+        $(document).ready(function() {
+        
+        $("#loginform").toggle();
+                         
+      $("form#signin").click(function(e) {
+
+      
+     
+      var user = document.getElementById("username").value;
+
+      var password = document.getElementById("password").value;
+      var passwd_hash = hex_sha1(password).toLowerCase();
+      var params = "user="+encodeURIComponent(user)+"&password="+encodeURIComponent(passwd_hash);
+
+      
+      var xhr = new XMLHttpRequest();
+   
+      xhr.open('GET','http://127.0.0.1:8888?'+params,false); //asynchronous request
+        
+   
+      xhr.onreadystatechange = function() { 
+
+
+  if (xhr.status == 200) {
+    $("#is_logged").attr("value",1);
+     $("#loginform").hide();
+     $(".lock").fadeIn();
+     $("#toolbar").html("Logged successfully as "+user);
+
+ } else {
+    $("#toolbar").html("INCORRECT USERNAME OR PASSWORD.ACCESS DENIED.");
+  }
+
+}
+
+xhr.send(null);
+         
+      });
+      
+    
+      $("input#cancel_submit").click(function(e) {
+          $("#loginform").hide();
+          $(".lock").fadeIn();
+      });     
+      
+      
+        });
+</script>
+  
+ </body> 
+ </html>

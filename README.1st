@@ -12,13 +12,15 @@ Templates make the whole architecture flexible and easy to extended. To expand t
 
 All the work of creating and editing web forms is performed on the client side (in the browser), without page reload and data retrieval from the server. It is made by Backbone.js and Underscore.js libraries. Only created form data are passed to the server. 
 
-Server part of the application is implemented in Python. It is th simple web server based on BaseHTTPServer Python class. 
+Server part of the application is implemented in Python. It is the web server based on tornado python web server
 
 Users data (web forms) are stored in the SQLite database as lists t parameters of HTML elements. When an user saves the form, a list of parameters is sent to the server and stored on the server side database. No HTML code is transferred through the network, which makes performance of entire application extremely well.
 
 INSTALLATION
 
-The application doesnt't need additional software to be installed.
+The application need the tornado web server installed:
+
+pip install tornado
 
 To install the application, it just should be copied to a directory on user's machine with Python 2.7 or higher installed.
 
@@ -28,18 +30,9 @@ To launch the application, just find the file runserver.bat (for Windows) or run
 
 After that, you may connect to the server from a browser with the followed address string:
 
-http://127.0.0.1:8888/builder.html
+http://127.0.0.1:8888/static/builder.html
 Google Chrome is highly recommended to use this application.
 
 After that, an user may create and store his/her own web forms on the server.
 
-POSSIBLE ISSUES
 
-The BaseHTTPServer packet is present in Python starting from 2.7 version. 
-
-To check it, one may just type in Python console:
-
->>import BaseHTTPServer as bhs
->>print bhs.__version__
-
-Version of currently installed BaseHTTPServer packet will be printed
