@@ -76,6 +76,49 @@ margin: 0 auto;
 
 }
 
+.dashboard{
+    float:right;
+ width: 500px;
+ border-style: solid;
+ width: 50.5%;
+ height: 90%;
+ visibility: hidden;
+/*----------------------------------------*/
+ margin: 0 auto;
+    margin-bottom: 3px;
+    margin-top: 3px;
+   
+    
+    background-color: white;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.1);
+    -moz-transition: 0.3s ease; /* ╨Ф╨╗╤П Firefox */
+    -webkit-transition: 0.3s ease; /* ╨Ф╨╗╤П Safari, Chrome, iOS */
+    -o-transition: 0.3s ease; /* ╨Ф╨╗╤П Opera */
+    transition: 0.3s ease;   
+    color: gray;
+    text-align: center;
+    font-family: Verdana,sans-serif;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+
+
+}
+
+.toolbartext{
+    
+padding: 15px 32px;
+text-align: center;
+text-decoration: none;
+display: inline-block;
+
+}
+
 .button {
     background-color: #4CAF50; /* Green */
     border: none;
