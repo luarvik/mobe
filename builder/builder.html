@@ -110,15 +110,25 @@ var mouseDown = function(e,id){
  <div class = "bar" id="el-container" ondrop = "drop(event)"  ondragover = "allowDrop(event)">
  <p>Drag'n'Drop chosen element here to create your own web form</p>
 
- 
+  <div class = "dashboard" id="dash">
+ <p>LATEST USER'S ACTIVITY</p>
+ <p>Form data elements saved recently:</p>
+ <p id="usract"></p>
+ </div> 
 
  </div>
+
+
 
    <div class="tools"> 
   
       <button class="button" id="saveform" onclick="sendHTTP()">SAVE FORM</button>
 
+      <button class="button" id="dboardbtn" onclick="showDashboard()" >DASHBOARD</button>
+
       <button class="signout-button" id="signout" onclick="signOut()">SIGN OUT</button>
+
+      <p id="toolbar" class="toolbartext"></p>
   
   </div>
 
@@ -155,7 +165,7 @@ var mouseDown = function(e,id){
 
  
   $(function(){
-   // <div id=<%- div_id %>  draggable = "true" ondragstart = <%- ondragstart %> onmousedown = "mouseDown(event,this.id)" >
+
     //these are base elements for our form builder. We may expand this list with any other ones
 
     FormBuilderManager.start({
@@ -176,7 +186,7 @@ var mouseDown = function(e,id){
           div_id: "20",
           type: 'text',
           value: 'TextField',
-          label: 'Simple text field',
+          label: 'Simple text',
           ondragstart: 'drag(event)'
         },
 
@@ -241,6 +251,44 @@ var mouseDown = function(e,id){
      
  };
 
+ var showDashboard = function(){
+   //$("#dash").css("visibility","visible");
+   //$("#dash").show();
+
+   if ($("#dboardbtn").html()=="DASHBOARD")
+   {
+      
+       $("#dash").css("visibility","visible");
+       $("#dash").show();
+       $("#dboardbtn").html("HIDE");
+
+      var xhr = new XMLHttpRequest();
+
+       xhr.onreadystatechange = function() { 
+       $("#usract").html(xhr.responseText);
+
+      }
+   
+      xhr.open('GET','http://127.0.0.1:8888?dashboard=1',false); //asynchronous request
+     
+     //Send list of parameters to the server
+      xhr.send(null);
+
+      
+
+    }
+    else{
+       $("#dash").css("visibility","hidden");
+       $("#dash").hide();
+       $("#dboardbtn").html("DASHBOARD");
+
+     
+
+    }
+
+
+ };
+
  </script>
 
  <script>
@@ -256,20 +304,30 @@ var mouseDown = function(e,id){
 
       var password = document.getElementById("password").value;
       var passwd_hash = hex_sha1(password).toLowerCase();
-      var params = "user="+user+"&password="+passwd_hash;
+      var params = "user="+encodeURIComponent(user)+"&password="+encodeURIComponent(passwd_hash);
 
       
       var xhr = new XMLHttpRequest();
    
       xhr.open('GET','http://127.0.0.1:8888?'+params,false); //asynchronous request
-      $("#is_logged").attr("value",1);
+        
+   
+      xhr.onreadystatechange = function() { 
+
+
+  if (xhr.status == 200) {
+    $("#is_logged").attr("value",1);
      $("#loginform").hide();
      $(".lock").fadeIn();
+     $("#toolbar").html("Logged successfully as "+user);
 
-      xhr.send(null);
+ } else {
+    $("#toolbar").html("INCORRECT USERNAME OR PASSWORD.ACCESS DENIED.");
+  }
 
-     
-        
+}
+
+xhr.send(null);
          
       });
       
