@@ -223,6 +223,8 @@ var mouseDown = function(e,id){
    
     var params="";
     var divChildCount = $('div.bar').find('div').each(function(index, elem) {
+     if (elem.id!="dash")
+     {
      var id = elem.id;
      var top = elem.style.top;
      var left = elem.style.left; 
@@ -231,6 +233,7 @@ var mouseDown = function(e,id){
      // Later we just put these parameters into appropriate BACKBONE.JS templates
      // It improves the entire performance of the system
      params+='id='+encodeURIComponent(id)+'&top='+encodeURIComponent(top)+'&left='+encodeURIComponent(left)+'&';
+   }
       
    }).length;
 
