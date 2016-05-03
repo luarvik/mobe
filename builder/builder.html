@@ -11,6 +11,24 @@
     <link href="vendor/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
 
 <script>
+ window.onload = function(){
+  
+  // we want to let the server know if the page has been reloaded
+  // in order to server state machine has changed its state
+
+   var xhr = new XMLHttpRequest();
+      
+      var host = window.location.host;
+      xhr.open('GET','http://'+host+':80?load=1',false); 
+     
+    
+      xhr.send(null); 
+    
+     
+ };
+</script>    
+
+<script>
 
  var drag = function(e){
    
@@ -71,6 +89,7 @@ var mouseDown = function(e,id){
   </head>
 
  <body>
+
 <input type="hidden" id="is_logged" value=0>
 <div id="loginform" class="box form">
     <p class="cap">Please login to start building the form<a href="" class="close">Close</a></p>
@@ -212,6 +231,13 @@ var mouseDown = function(e,id){
  <script>
 
  var signOut = function(){
+     var xhr = new XMLHttpRequest();
+      
+      var host = window.location.host;
+      xhr.open('GET','http://'+host+':80?load=1',false); 
+     
+    
+      xhr.send(null); 
     $("#is_logged").attr("value",0);
     $("#loginform").toggle();
     $(".lock").fadeOut();
@@ -223,6 +249,8 @@ var mouseDown = function(e,id){
    
     var params="";
     var divChildCount = $('div.bar').find('div').each(function(index, elem) {
+     if (elem.id!="dash")
+     {
      var id = elem.id;
      var top = elem.style.top;
      var left = elem.style.left; 
@@ -231,6 +259,7 @@ var mouseDown = function(e,id){
      // Later we just put these parameters into appropriate BACKBONE.JS templates
      // It improves the entire performance of the system
      params+='id='+encodeURIComponent(id)+'&top='+encodeURIComponent(top)+'&left='+encodeURIComponent(left)+'&';
+   }
       
    }).length;
 
@@ -240,10 +269,10 @@ var mouseDown = function(e,id){
        return;
      }
      params+='end=true';
-
+  
      var xhr = new XMLHttpRequest();
-   
-     xhr.open('GET','http://127.0.0.1:8888?'+params,false); //asynchronous request
+     var host = window.location.host;
+     xhr.open('GET','http://'+host+':80?'+params,false); //asynchronous request
      
      //Send list of parameters to the server
      xhr.send(null);
@@ -263,26 +292,23 @@ var mouseDown = function(e,id){
        $("#dboardbtn").html("HIDE");
 
       var xhr = new XMLHttpRequest();
-
+  
        xhr.onreadystatechange = function() { 
        $("#usract").html(xhr.responseText);
 
       }
    
-      xhr.open('GET','http://127.0.0.1:8888?dashboard=1',false); //asynchronous request
+      var host = window.location.host;
+      xhr.open('GET','http://'+host+':80?dashboard=1',false); //asynchronous request
      
      //Send list of parameters to the server
-      xhr.send(null);
-
-      
+      xhr.send(null);  
 
     }
     else{
        $("#dash").css("visibility","hidden");
        $("#dash").hide();
-       $("#dboardbtn").html("DASHBOARD");
-
-     
+       $("#dboardbtn").html("DASHBOARD");    
 
     }
 
@@ -299,18 +325,17 @@ var mouseDown = function(e,id){
       $("form#signin").click(function(e) {
 
       
-     
+      //alert(document.location);
       var user = document.getElementById("username").value;
 
       var password = document.getElementById("password").value;
       var passwd_hash = hex_sha1(password).toLowerCase();
       var params = "user="+encodeURIComponent(user)+"&password="+encodeURIComponent(passwd_hash);
-
       
       var xhr = new XMLHttpRequest();
-   
-      xhr.open('GET','http://127.0.0.1:8888?'+params,false); //asynchronous request
-        
+
+      var host = window.location.host;
+      xhr.open('GET','http://'+host+':80?'+params,false); //asynchronous request        
    
       xhr.onreadystatechange = function() { 
 

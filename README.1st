@@ -8,31 +8,27 @@ To store user password hashes, the JavaScript implementation of SHA-1 algorithm 
 
 To create HTML elements and forms, the underscore.js templates are used. Parameters of elements just created are passed to templates. Templates are rendered by Backbone.js library methods.
 
-Templates make the whole architecture flexible and easy to extended. To expand the existing list of elements with another one (for example, RadioButton), we just need to add an appropriate template into the application.
+Templates make the whole architecture flexible and easy to extend. To expand the existing list of elements with another one (for example, RadioButton), we just need to add an appropriate template into the application.
 
 All the work of creating and editing web forms is performed on the client side (in the browser), without page reload and data retrieval from the server. It is made by Backbone.js and Underscore.js libraries. Only created form data are passed to the server. 
 
-Server part of the application is implemented in Python. It is the web server based on tornado python web server
 
-Users data (web forms) are stored in the SQLite database as lists t parameters of HTML elements. When an user saves the form, a list of parameters is sent to the server and stored on the server side database. No HTML code is transferred through the network, which makes performance of entire application extremely well.
+Users data (web forms) are stored in the SQLite database as lists of parameters of HTML elements. When an user saves the form, a list of parameters is sent to the server and stored on the server side database. No HTML code is transferred through the network, which makes performance of entire application extremely well.
+
+HTTP SERVER IMPLEMENTATION
+
+The algorithmic core of the application is web and database server based on Tornado. This server is implemented as a complete state machine.
+This state machine describes well the interaction between client and server. At each moment, the machine can be only in one of states. Transition graph of states describes the server base algorithm. 
+This makes the entire architecture simple and flexible. Extending server functionality can be achieved by adding new states into the state machine. Each state is described by an abstract class and implemented in derived classes. 
 
 INSTALLATION
 
-The application need the tornado web server installed:
+This version of the application is designed  to be deployed on Amazon Elastic Cloud. Normally, it is launched as a daemon for Ubuntu Server operating system. File myserver.conf contains description of the service. To launch the service, just followed command is needed:
 
-pip install tornado
+sudo service myserver start
 
-To install the application, it just should be copied to a directory on user's machine with Python 2.7 or higher installed.
+Respectively, to stop the service, the followed command is needed:
 
-LAUNCH
-
-To launch the application, just find the file runserver.bat (for Windows) or runserver.sh (for *nix). This will launch the server on local machine
-
-After that, you may connect to the server from a browser with the followed address string:
-
-http://127.0.0.1:8888/static/builder.html
-Google Chrome is highly recommended to use this application.
-
-After that, an user may create and store his/her own web forms on the server.
+sudo service myserver stop  
 
 
