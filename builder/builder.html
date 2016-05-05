@@ -30,15 +30,43 @@
 
 <script>
 
+ var viewForm = function(){
+  
+    
+   $("#dash").css("visibility","hidden");
+   $("#dash").hide();
+   $("#form-container").css("visibility","visible");
+   $("#form-container").show();
+ };
+
  var drag = function(e){
    
     return false;
   };
 
+  var allowDrop = function(e){
+    
+    return false;
+  };
+
 var mouseDown = function(e,id){
- 
+
+/*We implement this function using SINGLETON pattern
+
+  In order to it could be called only once
+
+*/
+
+ //-----------------Singleton creation code----------------------------
+ if (mouseDown.prototype.__singletonInstance__) {
+      return mouseDown.prototype.__singletonInstance__;
+    }
+
+ mouseDown.prototype.__singletonInstance__ = this;   
+ //-------------------------------------------------------------------
  if ($("#is_logged").val()==1)
  {
+
   elem = document.getElementById(id); //dragged element
   parentElem = elem.parentNode;     //his parent, needed to restore it after drag'n'drop
 
@@ -48,6 +76,7 @@ var mouseDown = function(e,id){
   var coords = elem.getBoundingClientRect();
   var shiftX = e.pageX - coords.left;
   var shiftY = e.pageY - coords.top;
+
 
   elem.style.position = 'absolute';
 
@@ -59,6 +88,7 @@ var mouseDown = function(e,id){
 
   moveAt(e);
 
+ 
   parentElem.appendChild(elem_clone);
 
 
@@ -72,6 +102,10 @@ var mouseDown = function(e,id){
   };
 
   this.onmouseup = function() {
+    /*
+       Here we need to destroy our singleton to have an opportunity to add new elements
+   */
+    mouseDown.prototype.__singletonInstance__ = null;
     document.onmousemove = null;
     elem.onmouseup = null;
 
@@ -126,29 +160,37 @@ var mouseDown = function(e,id){
       </div>
  </div>
 
+
+
  <div class = "bar" id="el-container" ondrop = "drop(event)"  ondragover = "allowDrop(event)">
  <p>Drag'n'Drop chosen element here to create your own web form</p>
+
+   <div class = "form_view" id="form-container">
+     <div class="row">
+        <div class="col-xs-12 fmain-container">
+        
+        </div>
+      </div>
+      <button class="view" id="hide_preview" onclick="hidePreview()">HIDE</button>
+   </div>
+
+ 
 
   <div class = "dashboard" id="dash">
  <p>LATEST USER'S ACTIVITY</p>
  <p>Form data elements saved recently:</p>
  <p id="usract"></p>
+ <button class="view" id="preview" onclick="viewForm()">VIEW</button>
  </div> 
 
  </div>
 
 
-
-   <div class="tools"> 
-  
+   <div class="tools">   
       <button class="button" id="saveform" onclick="sendHTTP()">SAVE FORM</button>
-
       <button class="button" id="dboardbtn" onclick="showDashboard()" >DASHBOARD</button>
-
       <button class="signout-button" id="signout" onclick="signOut()">SIGN OUT</button>
-
-      <p id="toolbar" class="toolbartext"></p>
-  
+      <p id="toolbar" class="toolbartext"></p>  
   </div>
 
   <script type="text/template" id="formbuilder-input-element">
@@ -159,12 +201,23 @@ var mouseDown = function(e,id){
  </script>
 
  <script type="text/template" id="formbuilder-elements">
-     <p>Choose an element to add to the form</p>
-      
+     <p>Choose an element to add to the form</p>    
       <ul class="elements-container"></ul>
-
       <p>You may easily extend existing list of elements with new ones</p>
     
+ </script>
+
+ <script type="text/template" id="formbuilder-saved-element">
+   <div id=<%- div_id %> style="<%- style %>">
+      <input type=<%- type %> value=<%- value %> id=<%- id %> width="40">
+      <label for=<%- id %> ><%- label %></label>
+   </div>
+ </script>
+
+ <script type="text/template" id="formbuilder-felements">
+     <p>Users last created form preview</p>     
+      <ul class="felements-container"></ul>     
+
  </script>
  
  <script src="vendor/jquery/jquery.js"></script>
@@ -177,6 +230,13 @@ var mouseDown = function(e,id){
  <script src="app/js/collections/elements.js"></script>
  <script src="app/js/views/element.js"></script>
  <script src="app/js/views/elements.js"></script>
+
+
+ <script src="app/js/models/selement.js"></script>
+ <script src="app/js/collections/selements.js"></script>
+ <script src="app/js/views/selement.js"></script>
+ <script src="app/js/views/selements.js"></script>
+
  <script src="app/js/router.js"></script> 
 
  <script>
@@ -246,10 +306,32 @@ var mouseDown = function(e,id){
 
   var sendHTTP = function(){
    
+    /*
+       We want to exclude extra elements from resulted URL string
+       And to do this in a Python manner , using 'in' operator 
+    */
+    String.prototype.in = function(array){
+       var is_in = false;
+       for(var i=0; i< array.length; i++){
+         if (this.valueOf() == array[i]){
+             is_in = true;
+             break;
+
+          }
+       }
+
+       return is_in;
+    };
    
     var params="";
+
+    var restricted_ids = ["dash","form-container",""]; // rubbishy divs . We don't need them in our GET query
+
     var divChildCount = $('div.bar').find('div').each(function(index, elem) {
-     if (elem.id!="dash")
+    /*
+       if elem.id is not in restricted_ids
+    */
+      if(!elem.id.in(restricted_ids))
      {
      var id = elem.id;
      var top = elem.style.top;
@@ -269,7 +351,7 @@ var mouseDown = function(e,id){
        return;
      }
      params+='end=true';
-  
+     console.log(params);
      var xhr = new XMLHttpRequest();
      var host = window.location.host;
      xhr.open('GET','http://'+host+':80?'+params,false); //asynchronous request
@@ -278,6 +360,93 @@ var mouseDown = function(e,id){
      xhr.send(null);
      
      
+ };
+
+ var create_element_struct = function(activity){
+   /*
+    It's easy to do it in Python
+
+     def create_element_struct(self,activity):
+        struct = dict()
+        l1 = activity.split(';')
+        l2 = l1[1:] # trim date and time
+        for elem in l2:
+            l3 = elem.split(':')
+            elem_name = l3[0]
+            top_left = l3[1].split(',')
+            top = top_left[1][4:]
+            left = top_left[0][5:]
+            struct[left,top] = elem_name
+        return struct           
+     
+     But for the sake of performance, we must do it on client's side
+
+   */
+    var structs_list = [];
+    l1 = activity.split(';');
+
+    for (var i=1; i<l1.length; i++){
+      var struct = {};
+      l3 = l1[i].trim().split(':');
+      var elem_name = l3[0];
+      struct.id = i;
+      struct.element = elem_name;
+      var parameters = [];
+      var top_left = l3[1].split(',');
+      var left = top_left[0].split('=');
+      var top = top_left[1].split('=');
+      parameters.push(left[1]);
+      parameters.push(top[1]);
+      struct.parameters = parameters;
+      structs_list.push(struct);
+    }
+    //console.log(JSON.stringify(structs_list));
+    /*
+       In the end, we got something like this:
+
+       [{"id":1,"element":"Text","parameters":["43px","64px"]},{"id":2,"element":"Text","parameters":["808px","249px"]},{"id":3,"element":"Button","parameters":["43px","36px"]},{"id":4,"element":"Button","parameters":["692px","154px"]}]
+
+       parameters: [left,top]
+    */
+    return JSON.stringify(structs_list);
+
+ };
+
+ var jsonToTemplateObject = function(json_string){
+
+     /*
+       We want to get something like this in order to pass it to template and render
+      [{"type":"button","id":"1","value":"Button","label":"Simple button","style":"position: absolute; left: 43px; top: 36px;"},{"type":"button","id":"2","value":"Button","label":"Simple button","style":"position: absolute; left: 783px; top: 221px;"}]
+
+     */
+
+    console.log(json_string);
+    String.prototype.decapitalizeFirstLetter = function() {
+    return this.charAt(0).toLowerCase() + this.slice(1);
+   };
+
+     var template_object =[];
+     var elements = JSON.parse(json_string);
+     for(var i=0; i<elements.length; i++){
+       element = elements[i];
+       element_object = {};
+       element_object.type = element.element.decapitalizeFirstLetter();
+       element_object.id = element.id.toString();
+       element_object.div_id = (element_object.id*10).toString();
+       element_object.value = element.element;
+       element_object.label = "Simple "+element_object.type;
+       // ...something is not good with JS regexps...
+       var regexp = /[0-9]+/g;
+       var new_x = regexp.exec(element.parameters[0])-454;
+       var regexp1 = /[0-9]+/g;
+       // this trick with x-1+11(i.e. x+10) is needed to avoid using parseInt() method
+       var new_y =regexp1.exec(element.parameters[1])-1; 
+       new_y+=11;
+       element_object.style = "position: absolute; left: "+ new_x + "px; top: " + new_y + "px;";
+       template_object.push(element_object);
+     }  
+
+    return template_object;
  };
 
  var showDashboard = function(){
@@ -295,7 +464,16 @@ var mouseDown = function(e,id){
   
        xhr.onreadystatechange = function() { 
        $("#usract").html(xhr.responseText);
+       var json_data = create_element_struct(xhr.responseText);
 
+       var retrieved_elements = jsonToTemplateObject(json_data);
+
+        FormBuilderManager.viewSavedForm({
+     
+           felements: retrieved_elements
+
+         });
+     
       }
    
       var host = window.location.host;
@@ -312,6 +490,15 @@ var mouseDown = function(e,id){
 
     }
 
+
+ };
+
+ var hidePreview = function(){
+    
+     $("#form-container").css("visibility","hidden");
+     $("#form-container").hide();
+     $("#dash").css("visibility","visible");
+     $("#dash").show();
 
  };
 
