@@ -110,6 +110,7 @@ class LoggedState(QueryState):
     @staticmethod
     def save(parameters):
         print "save called"
+        #/home/ubuntu/form_builder/data/'
         data_storage_path = os.path.abspath('/home/ubuntu/form_builder/data/') # ./data
         fh = open(os.path.join(data_storage_path,'user.dat'),'w') 
         output_string = "500,"+str(datetime.datetime.now())+'\n' 
@@ -133,16 +134,20 @@ class LoggedState(QueryState):
 
     @staticmethod
     def activity(parameters):  
+        #/home/ubuntu/form_builder/data/'
         data_storage_path = os.path.abspath('/home/ubuntu/form_builder/data/') # ./data
         fh = open(os.path.join(data_storage_path,'user.dat'),'r')  
         types = {"10":"Button", "20":"Text", "30":"Checkbox",}
         activity = ""
         for line in fh:
+            if len(activity)>0:
+                activity+=';'
+            #line = line[:-1]    
             params = line.split(',')
             if params[0]=="500":
-                activity+="Date and time:"+params[1]+";"
+                activity+="Date and time:"+params[1].split('.')[0]
                 continue
-            activity+=types[params[0]]+":left="+params[1]+";top="+params[2]+'\n'
+            activity+=types[params[0]]+":left="+params[1]+",top="+params[2]
         fh.close()           
         return activity 
 
@@ -195,7 +200,19 @@ class MainHandler(tornado.web.RequestHandler):
         
     def show_machine_state(self):
         print "State machine: "+ str(self.application.settings["state_machine"].state).replace("__main__.","")   
-                    
+
+    def create_element_struct(self,activity):
+        struct = dict()
+        l1 = activity.split(';')
+        l2 = l1[1:] # trim date and time
+        for elem in l2:
+            l3 = elem.split(':')
+            elem_name = l3[0]
+            top_left = l3[1].split(',')
+            top = top_left[1][4:]
+            left = top_left[0][5:]
+            struct[left,top] = elem_name
+        return struct                
                      
     def get(self): 
         
@@ -215,6 +232,7 @@ class MainHandler(tornado.web.RequestHandler):
         machine_state = str(self.application.settings["state_machine"].state).replace("__main__.","")   
         if (machine_state == "DisconnectedState"):
             self.is_logged = False
+            #/home/ubuntu/form_builder/data/'
             db_path = os.path.abspath('/home/ubuntu/form_builder/data/') # ./data
             db = os.path.join(db_path,'fbuilder')
             self.connection = self.application.settings["state_machine"].state.connect(db_path,db)  
@@ -248,8 +266,16 @@ class MainHandler(tornado.web.RequestHandler):
                 self.set_status(404)
                 self.application.settings["state_machine"].state.disconnect(self.connection)
                 self.application.settings["state_machine"].newState(DisconnectedState)  
-                self.show_machine_state()
+                self.show_machine_state() 
         elif(method == "activity"):
+            '''
+            Good! But we better do it in the browser, in order not to send extra data through network
+            
+            activity_struct = self.create_element_struct(data)
+            for k in activity_struct:
+                print activity_struct[k]
+                print k
+            '''    
             self.write(data)         
                
   
