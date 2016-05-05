@@ -39,7 +39,19 @@ window.FormBuilderManager = {
       
       Backbone.history.start();
    
-	}
+	},
+
+viewSavedForm: function(data){
+
+  var felements = new FormBuilderManager.Collections.Selements(data.felements);
+    
+  var felementsView = new FormBuilderManager.Views.Selements({
+        collection: felements
+      });
+  
+  $('.fmain-container').html(felementsView.render().$el);     
+  
+}
 
 
 };
